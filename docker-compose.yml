@@ -1,0 +1,89 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: mdillon/postgis:latest
+    environment:
+      POSTGRES_USER: bbleap_user
+      POSTGRES_PASSWORD: bbleap_password
+      POSTGRES_DB: bbleap_db
+#    ports:
+#      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "sh -c 'pg_isready -U ${POSTGRES_USER}'"]
+      interval: 3s
+      timeout: 3s
+      retries: 5
+
+  postgres_test:
+    image: mdillon/postgis:latest
+    environment:
+      POSTGRES_USER: bbleap_user
+      POSTGRES_PASSWORD: bbleap_password
+      POSTGRES_DB: test_bbleap_db
+#    ports:
+#      - "54320:5432"
+    volumes:
+      - postgres_data_test:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "sh -c 'pg_isready -U ${POSTGRES_USER}'"]
+      interval: 3s
+      timeout: 3s
+      retries: 5
+
+  redis:
+    hostname: redis.geosatfinal
+    image: redis:7.2.3
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: [ "CMD-SHELL", "redis-cli ping | grep PONG" ]
+      interval: 3s
+      timeout: 3s
+      retries: 7
+
+
+  geosatfinal:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./media:/app/media
+    environment:
+      - PYTHONUNBUFFERED=1
+      - DATABASE_URL=postgresql://bbleap_user:bbleap_password@postgres/bbleap_db
+      - DATABASE_TEST_URL=postgresql://bbleap_user:bbleap_password@postgres_test/test_bbleap_db
+      - REDIS_HOST=redis
+      - SECRET_KEY=J2aR3Dc4TmZvvhK_FW6p5fxMHIRLkmis7JhWCHuzxQY
+    command:  bash -c "alembic upgrade head && uvicorn main:app --host 0.0.0.0 --port 8000 --reload"
+
+    depends_on:
+      - postgres
+      - postgres_test
+      - redis
+    restart: always
+
+
+
+
+
+volumes:
+  redis_data:
+    name: redis_data
+  postgres_data:
+    name: postgres_data
+  postgres_data_test:
+    name: postgres_data_test
+
+
+networks:
+  bbleap-stage:
+    external: false
+    driver: bridge
+

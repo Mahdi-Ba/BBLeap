@@ -1,0 +1,11 @@
+# Ignore __pycache__ directory
+__pycache__/
+
+# Ignore .vscode directory
+.vscode/
+.DS_Store
+venv
+.idea
+core/.env
+.pytest_cache
+__pycache__
