@@ -61,15 +61,13 @@ services:
       - DATABASE_TEST_URL=postgresql://bbleap_user:bbleap_password@postgres_test/test_bbleap_db
       - REDIS_HOST=redis
       - SECRET_KEY=J2aR3Dc4TmZvvhK_FW6p5fxMHIRLkmis7JhWCHuzxQY
-    command:  bash -c "alembic upgrade head && uvicorn main:app --host 0.0.0.0 --port 8000 --reload"
+    command:  bash -c "alembic upgrade head && uvicorn main:app --host 0.0.0.0 --port 8000"
 
     depends_on:
       - postgres
       - postgres_test
       - redis
     restart: always
-
-
 
 
 
