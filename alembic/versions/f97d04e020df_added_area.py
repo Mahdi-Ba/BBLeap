@@ -28,7 +28,7 @@ def upgrade() -> None:
     sa.PrimaryKeyConstraint('id'),
     sa.UniqueConstraint('uuid')
     )
-    # op.create_index('idx_area_geometry', 'area', ['geometry'], unique=False, postgresql_using='gist')
+    op.create_index('idx_area_geometry', 'area', ['geometry'], unique=False, postgresql_using='gist')
     op.create_table('customer',
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('uuid', postgresql.UUID(as_uuid=True), nullable=False),
@@ -50,7 +50,6 @@ def upgrade() -> None:
     )
     op.create_index(op.f('ix_token_access_token'), 'token', ['access_token'], unique=False)
     op.create_index(op.f('ix_token_id'), 'token', ['id'], unique=False)
-    # op.drop_table('spatial_ref_sys')
     # ### end Alembic commands ###
 
 
@@ -62,6 +61,6 @@ def downgrade() -> None:
     op.drop_index(op.f('ix_customer_username'), table_name='customer')
     op.drop_index(op.f('ix_customer_id'), table_name='customer')
     op.drop_table('customer')
-    # op.drop_index('idx_area_geometry', table_name='area', postgresql_using='gist')
+    op.drop_index('idx_area_geometry', table_name='area', postgresql_using='gist')
     op.drop_table('area')
     # ### end Alembic commands ###
